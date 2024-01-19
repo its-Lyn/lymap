@@ -3,14 +3,16 @@ use crate::utils::env_variables::{xdg_config_set, get_variable};
 use std::path::Path;
 use std::fs;
 
+use log::{info, error, warn};
+
 use super::models::WindowConfig;
 
 fn create_if_not_exists(path: &str) {
     if !Path::new(path).is_dir() {
-        println!("{} does not exist, creating.", path);
+        info!("{} does not exist, creating.", path);
 
         if let Err(e) = fs::create_dir(path) {
-            println!("Failed to create config dir: {}, aborting", e);
+            error!("Failed to create config dir: {}, aborting", e);
             std::process::exit(1);
         }
     }
@@ -19,11 +21,11 @@ fn create_if_not_exists(path: &str) {
 pub fn create_config() {
     // Set config dir based on user env variables.
     let base_config = if xdg_config_set() {
-        println!("Using XDG_CONFIG_HOME directory");
+        warn!("Using XDG_CONFIG_HOME directory");
         
         get_variable("XDG_CONFIG_HOME")
     } else {
-        println!("Using traditional config directory");
+        warn!("Using traditional config directory");
         
         format!("{}/.config", get_variable("HOME"))
     };
@@ -37,20 +39,23 @@ pub fn create_config() {
     // Create window_config.json
     if !Path::new(format!("{}/window_config.json", lymap_conf).as_str()).exists() {
         let default_config = WindowConfig {
-            bg_colour: "#0c42a6".to_string()
+            bg_colour: "#0c42a6".to_string(),
+            
+            width: None,
+            height: None
         };
 
-        println!("window_config.json does not exist, creating.");
+        info!("window_config.json does not exist, creating.");
 
         match fs::File::create(format!("{}/window_config.json", lymap_conf)) {
             Ok(file) => {
                 if let Err(e) = serde_json::to_writer_pretty(file, &default_config) {
-                    println!("Failed to write to config file: {}, aborting", e);
+                    error!("Failed to write to config file: {}, aborting", e);
                     std::process::exit(1);
                 }
             },
             Err(e) => {
-                println!("Failed to create config file: {}, aborting", e);
+                error!("Failed to create config file: {}, aborting", e);
                 std::process::exit(1);
             }
         }

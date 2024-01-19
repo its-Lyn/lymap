@@ -1,8 +1,10 @@
+use log::error;
+
 pub fn get_variable(name: &str) -> String {
     match std::env::var(name) {
         Ok(value) => value,
-        Err(_) => {
-            println!("Failed to fetch..");
+        Err(e) => {
+            error!("Failed to fetch: {}", e);
             std::process::exit(1);
         }
     }
