@@ -5,9 +5,10 @@ use device_query::{DeviceState, Keycode, DeviceQuery};
 use env_logger::Builder;
 use log::{error, warn, LevelFilter, info};
 
-use macroquad::{miniquad, window::{next_frame, clear_background, request_new_screen_size}, text::load_ttf_font, input::is_key_down};
+use macroquad::{miniquad, window::{next_frame, clear_background, request_new_screen_size}, text::{load_ttf_font, Font}, input::is_key_down};
 
 use native_dialog::FileDialog;
+use serde::de::Expected;
 use ui::buttons;
 use utils::{colour::hex_to_rgb, config_path::get_config_path};
 
@@ -82,7 +83,21 @@ async fn main() {
     let device_state = DeviceState::new(); 
     
     // Load font
-    let font = if_err!(load_ttf_font(&window_config.font_path).await, "Failed to load font"); 
+    let font: Font = match load_ttf_font(&window_config.font_path).await {
+        Ok(font_ok) => {
+            info!("Loaded font {}", &window_config.font_path);
+            font_ok
+        },
+
+        Err(e) => {
+            error!("Failed to load font: {}. Trying to fall back to default.", e);
+
+            let current_binary = if_err!(std::env::current_exe(), "Failed to fetch binary path.");
+            let binary_directory = current_binary.parent().expect("Failed to fetch binary directory");
+
+            if_err!(load_ttf_font(&format!("{}/assets/OpenSans-Regular.ttf", binary_directory.display())).await, "Failed to load default font.")
+        }
+    };
 
     loop {
         // Update
