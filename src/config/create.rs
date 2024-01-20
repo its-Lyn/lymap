@@ -39,14 +39,14 @@ pub fn create_config() -> Result<(), Box<dyn Error>> {
         // Fetch the default font path (lymap/assets)
         let binary_path = std::env::current_exe()?;
         let binary_dir  = binary_path.parent().expect("Failed to get parent of binary.");
-        let font_loc    = format!("{}/assets/OpenSans-Regular.ttf", binary_dir.display());
+        let font_loc    = format!("{}/assets/Ubuntu-Regular.ttf", binary_dir.display());
 
         let default_config = WindowConfig {
             bg_colour: "#0c42a6".to_string(),
 
             font_path: font_loc,
-            font_size: 18,
-            font_colour: "#ffffff".to_string(),
+            font_size: 14,
+            font_colour: "#000000".to_string(),
             
             width: None,
             height: None

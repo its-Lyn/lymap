@@ -95,7 +95,7 @@ async fn main() {
             let current_binary = if_err!(std::env::current_exe(), "Failed to fetch binary path.");
             let binary_directory = current_binary.parent().expect("Failed to fetch binary directory");
 
-            if_err!(load_ttf_font(&format!("{}/assets/OpenSans-Regular.ttf", binary_directory.display())).await, "Failed to load default font.")
+            if_err!(load_ttf_font(&format!("{}/assets/Ubuntu-Regular.ttf", binary_directory.display())).await, "Failed to load default font.")
         }
     };
 
@@ -118,10 +118,14 @@ async fn main() {
                 // this is not an error and should be handled accordingly. 
                 if let Some(path) = possible_path {
                     info!("Path provided, continue.");
-                    let config_source = if_err!(std::fs::read_to_string(path), "Failed to fetch button config json");
+                    let config_source = if_err!(std::fs::read_to_string(&path), "Failed to fetch button config json");
             
-                    match serde_json::from_str(&config_source) {
-                        Ok(config) => {
+                    match serde_json::from_str::<Option<ButtonConfig>>(&config_source) {
+                        Ok(config) => { 
+                            if config.is_some() {
+                                info!("Loaded layout {}", &path.display());
+                            }
+
                             btn_config = config; 
                         },
 
