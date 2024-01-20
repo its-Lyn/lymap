@@ -1,4 +1,6 @@
 
+use std::error;
+
 use config::{create::create_config, models::{WindowConfig, ButtonConfig}};
 
 use device_query::{DeviceState, Keycode, DeviceQuery};
@@ -92,31 +94,34 @@ async fn main() {
 
             match path {
                 Ok(val) => {
-                    if let Err(e) = val {
-                        error!("Failed to parse string: {}", e);
-                        std::process::exit(1);
-                    }
-                    
-                    match std::fs::read_to_string(val) {
-                        Ok(source) => {
-                            match serde_json::from_str(&source) {
-                                Ok(config) => {
-                                    btn_config = config;
+                   match val {
+                        Some(real_path) => {
+                            match std::fs::read_to_string(real_path) {
+                                Ok(source) => {
+                                    match serde_json::from_str(&source) {
+                                        Ok(config) => {
+                                            btn_config = config;
+                                        },
+
+                                        Err(e) => {
+                                            error!("Failed to deserialise config: {}", e);
+                                            std::process::exit(1);
+                                        } 
+                                    }
                                 },
 
                                 Err(e) => {
-                                    error!("Failed to deserialise config: {}", e);
+                                    error!("Failed to parse JSON source: {}", e);
                                     std::process::exit(1);
-                                } 
+                                }
                             }
                         },
 
-                        Err(e) => {
-                            error!("Failed to parse JSON source: {}", e);
+                        None => {
+                            error!("No real path provided");
                             std::process::exit(1);
                         }
-                    }
-
+                   }  
                 },
 
                 Err(e) => {
