@@ -125,8 +125,10 @@ async fn main() {
 
         if is_key_down(miniquad::KeyCode::LeftControl) && is_key_down(miniquad::KeyCode::R) {
             if !config_reset {
-                btn_config = None;
-                info!("Resetting button layout.");
+                if btn_config.is_some() {
+                    info!("Resetting button layout.");
+                    btn_config = None; 
+                }
 
                 config_reset = true;
             }
