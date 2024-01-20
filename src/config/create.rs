@@ -36,14 +36,23 @@ pub fn create_config() -> Result<(), Box<dyn Error>> {
 
     // Create window_config.json
     if !Path::new(format!("{}/window_config.json", lymap_conf).as_str()).exists() {
+        // Fetch the default font path (lymap/assets)
+        let binary_path = std::env::current_exe()?;
+        let binary_dir  = binary_path.parent().expect("Failed to get parent of binary.");
+        let font_loc    = format!("{}/assets/OpenSans-Regular.ttf", binary_dir.display());
+
         let default_config = WindowConfig {
             bg_colour: "#0c42a6".to_string(),
+
+            font_path: font_loc,
+            font_size: 18,
+            font_colour: "#ffffff".to_string(),
             
             width: None,
             height: None
         };
 
-        info!("window_config.json does not exist, creating.");
+        info!("{}/window_config.json does not exist, creating.", lymap_conf);
 
         let file = fs::File::create(format!("{}/window_config.json", lymap_conf))?;
         serde_json::to_writer_pretty(file, &default_config)?;

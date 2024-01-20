@@ -37,6 +37,7 @@ async fn main() {
     // Create custom init
     let mut builder = Builder::new();
     builder.filter_level(LevelFilter::Info);
+    builder.format_timestamp_millis();
 
     builder.init();
 
@@ -81,7 +82,7 @@ async fn main() {
     let device_state = DeviceState::new(); 
     
     // Load font
-    let font = load_ttf_font("./assets/OpenSans-Regular.ttf").await.unwrap(); 
+    let font = if_err!(load_ttf_font(&window_config.font_path).await, "Failed to load font"); 
 
     loop {
         // Update
@@ -138,7 +139,7 @@ async fn main() {
         
         if let Some(config) = &btn_config { 
             for button in config.buttons.iter() { 
-                buttons::draw_fmt(button, &font, &keys, &config.idle_colour, &config.active_colour);
+                buttons::draw_fmt(button, &font, &keys, &config.idle_colour, &config.active_colour, window_config.font_size, &window_config.font_colour);
             }
         }
 
