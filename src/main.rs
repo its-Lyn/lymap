@@ -40,6 +40,14 @@ async fn main() {
 
     builder.init();
 
+    let lymap_version = "0.1.5-beta";
+    let current_os = std::env::consts::OS;
+    let current_arch = std::env::consts::ARCH;
+
+    info!("Lymap version: {}", lymap_version);
+    info!("Running on: {}", current_os);
+    info!("CPU Arch: {}", current_arch);
+
     // Create lymap configs, aka <CONFIG>/lymap and lymap/layouts
     if_err!(create_config(), "Failed to create config");
     
@@ -68,6 +76,7 @@ async fn main() {
     let mut btn_config: Option<ButtonConfig> = Default::default();
 
     let mut config_load = false;
+    let mut config_reset = false;
 
     let device_state = DeviceState::new(); 
     
@@ -78,37 +87,50 @@ async fn main() {
         // Update
         let keys: Vec<Keycode> = device_state.get_keys();
 
-        if is_key_down(miniquad::KeyCode::LeftControl) && is_key_down(miniquad::KeyCode::L) && !config_load {
-            info!("Trying to load config folder...");
+        if is_key_down(miniquad::KeyCode::LeftControl) && is_key_down(miniquad::KeyCode::L) {
+           if !config_load {
+                info!("Trying to load config folder...");
         
-            let dialog = FileDialog::new()
-                .set_location(&format!("{}/layouts", if_err!(get_config_path(), "Failed to fetch variable")))
-                .add_filter("JSON File", &["json"])
-                .show_open_single_file();
+                let dialog = FileDialog::new()
+                    .set_location(&format!("{}/layouts", if_err!(get_config_path(), "Failed to fetch variable")))
+                    .add_filter("JSON File", &["json"])
+                    .show_open_single_file();
 
-            let possible_path = if_err!(dialog, "Failed to open file dialog"); 
+                let possible_path = if_err!(dialog, "Failed to open file dialog"); 
             
-            // User has the choice to either provide a path to the dialog or not.
-            // this is not an error and should be handles accordingly. 
-            if let Some(path) = possible_path {
-                info!("Path provided, continue.");
-                let config_source = if_err!(std::fs::read_to_string(path), "Failed to fetch button config json");
+                // User has the choice to either provide a path to the dialog or not.
+                // this is not an error and should be handled accordingly. 
+                if let Some(path) = possible_path {
+                    info!("Path provided, continue.");
+                    let config_source = if_err!(std::fs::read_to_string(path), "Failed to fetch button config json");
             
-                match serde_json::from_str(&config_source) {
-                    Ok(config) => {
-                        btn_config = config;
-                    },
+                    match serde_json::from_str(&config_source) {
+                        Ok(config) => {
+                            btn_config = config; 
+                        },
 
-                    Err(e) => {
-                        // This is not a fatal error, just skip loading the config.
-                        warn!("Failed to parse button config: {}", e);
+                        Err(e) => {
+                            // This is not a fatal error, just skip loading the config.
+                            warn!("Failed to parse button config: {}", e);
+                        }
                     }
                 }
-            }
 
-            config_load = true;
+                config_load = true;
+           } 
         } else {
             config_load = false;
+        }
+
+        if is_key_down(miniquad::KeyCode::LeftControl) && is_key_down(miniquad::KeyCode::R) {
+            if !config_reset {
+                btn_config = None;
+                info!("Resetting button layout.");
+
+                config_reset = true;
+            }
+        } else  {
+            config_reset = false;
         }
 
         // Draw
