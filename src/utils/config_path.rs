@@ -1,11 +1,13 @@
-use crate::utils::env_variables::{get_variable, xdg_config_set};
+use std::env::VarError;
 
-pub fn get_config_path() -> String {
+use crate::utils::env_variables::xdg_config_set;
+
+pub fn get_config_path() -> Result<String, VarError> {
     let base_config = if xdg_config_set() { 
-        get_variable("XDG_CONFIG_HOME")
+        std::env::var("XDG_CONFIG_HOME")?
     } else { 
-        format!("{}/.config", get_variable("HOME"))
+        format!("{}/.config", std::env::var("HOME")?)
     };
 
-    format!("{}/lymap", base_config)
+    Ok(format!("{}/lymap", base_config))
 }

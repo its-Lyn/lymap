@@ -1,6 +1,3 @@
-
-use std::error;
-
 use config::{create::create_config, models::{WindowConfig, ButtonConfig}};
 
 use device_query::{DeviceState, Keycode, DeviceQuery};
@@ -8,16 +5,30 @@ use device_query::{DeviceState, Keycode, DeviceQuery};
 use env_logger::Builder;
 use log::{error, warn, LevelFilter, info};
 
-use macroquad::{miniquad, window::{next_frame, clear_background, request_new_screen_size}, text::load_ttf_font, input::{is_key_down, is_key_released}};
+use macroquad::{miniquad, window::{next_frame, clear_background, request_new_screen_size}, text::load_ttf_font, input::is_key_down};
 
 use native_dialog::FileDialog;
 use ui::buttons;
 use utils::{colour::hex_to_rgb, config_path::get_config_path};
 
-mod window;
 mod utils;
 mod config;
 mod ui;
+
+// Macro for easily handling errors in one line..
+macro_rules! if_err {
+    ($expression:expr, $message:tt) => {
+        match $expression {
+            Ok(ok) => ok,
+
+            Err(e) => {
+                error!("{}: {}", $message, e);
+            
+                std::process::exit(1);
+            }
+        }
+    };
+}
 
 #[macroquad::main("Lymap")]
 async fn main() {
@@ -29,30 +40,13 @@ async fn main() {
 
     builder.init();
 
-    // Create lymap configs, aka CONFIG/lymap and lymap/layouts
-    create_config();
+    // Create lymap configs, aka <CONFIG>/lymap and lymap/layouts
+    if_err!(create_config(), "Failed to create config");
     
-    // Init
-    let window_config: WindowConfig;
-    match std::fs::read_to_string(&format!("{}/window_config.json", get_config_path())) {
-        Ok(json) => {
-            match serde_json::from_str::<WindowConfig>(&json) {
-                Ok(config) => {
-                    window_config = config;
-                },
-
-                Err(e) => {
-                    error!("Failed to deserialise window config: {}", e);
-                    std::process::exit(1);
-                }
-            } 
-        },
-
-        Err(e) => {
-            error!("Failed to parse config file: {}", e);
-            std::process::exit(1);
-        }
-    };
+    // Init 
+    let window_path = &format!("{}/window_config.json", if_err!(get_config_path(), "Failed to fetch variable"));
+    let window_source = if_err!(std::fs::read_to_string(window_path), "Failed to fetch window config json source");
+    let window_config = if_err!(serde_json::from_str::<WindowConfig>(&window_source), "Failed to parse window config json");
 
     // Warn if either width or height are set without the other
     if window_config.width.is_some() && window_config.height.is_none() {
@@ -87,51 +81,33 @@ async fn main() {
         if is_key_down(miniquad::KeyCode::LeftControl) && is_key_down(miniquad::KeyCode::L) && !config_load {
             info!("Trying to load config folder...");
         
-            let path = FileDialog::new()
-                .set_location(&format!("{}/layouts", get_config_path()))
+            let dialog = FileDialog::new()
+                .set_location(&format!("{}/layouts", if_err!(get_config_path(), "Failed to fetch variable")))
                 .add_filter("JSON File", &["json"])
                 .show_open_single_file();
 
-            match path {
-                Ok(val) => {
-                   match val {
-                        Some(real_path) => {
-                            match std::fs::read_to_string(real_path) {
-                                Ok(source) => {
-                                    match serde_json::from_str(&source) {
-                                        Ok(config) => {
-                                            btn_config = config;
-                                        },
+            let possible_path = if_err!(dialog, "Failed to open file dialog"); 
+            
+            // User has the choice to either provide a path to the dialog or not.
+            // this is not an error and should be handles accordingly. 
+            if let Some(path) = possible_path {
+                info!("Path provided, continue.");
+                let config_source = if_err!(std::fs::read_to_string(path), "Failed to fetch button config json");
+            
+                match serde_json::from_str(&config_source) {
+                    Ok(config) => {
+                        btn_config = config;
+                    },
 
-                                        Err(e) => {
-                                            error!("Failed to deserialise config: {}", e);
-                                            std::process::exit(1);
-                                        } 
-                                    }
-                                },
-
-                                Err(e) => {
-                                    error!("Failed to parse JSON source: {}", e);
-                                    std::process::exit(1);
-                                }
-                            }
-                        },
-
-                        None => {
-                            error!("No real path provided");
-                            std::process::exit(1);
-                        }
-                   }  
-                },
-
-                Err(e) => {
-                    error!("Failed to initialise file dialog: {}", e);
-                    std::process::exit(1);
+                    Err(e) => {
+                        // This is not a fatal error, just skip loading the config.
+                        warn!("Failed to parse button config: {}", e);
+                    }
                 }
             }
 
             config_load = true;
-        } else if is_key_released(miniquad::KeyCode::LeftControl) || is_key_released(miniquad::KeyCode::L) {
+        } else {
             config_load = false;
         }
 

@@ -1,6 +1,6 @@
-use crate::utils::env_variables::{xdg_config_set, get_variable};
+use crate::utils::env_variables::xdg_config_set;
 
-use std::path::Path;
+use std::{path::Path, error::Error};
 use std::fs;
 
 use log::{info, error, warn};
@@ -18,19 +18,17 @@ fn create_if_not_exists(path: &str) {
     }
 }
 
-pub fn create_config() {
+pub fn create_config() -> Result<(), Box<dyn Error>> {
     // Set config dir based on user env variables.
     let base_config = if xdg_config_set() {
         warn!("Using XDG_CONFIG_HOME directory");
-        
-        get_variable("XDG_CONFIG_HOME")
+        std::env::var("XDG_CONFIG_HOME")?
     } else {
-        warn!("Using traditional config directory");
-        
-        format!("{}/.config", get_variable("HOME"))
+        warn!("Using traditional config directory"); 
+        format!("{}/.config", std::env::var("HOME")?)
     };
 
-    create_if_not_exists(base_config.as_str());
+    create_if_not_exists(&base_config);
 
     // Create lymap folder, AFTER checking if the base exists..
     let lymap_conf = format!("{}/lymap", base_config);
@@ -47,22 +45,12 @@ pub fn create_config() {
 
         info!("window_config.json does not exist, creating.");
 
-        match fs::File::create(format!("{}/window_config.json", lymap_conf)) {
-            Ok(file) => {
-                if let Err(e) = serde_json::to_writer_pretty(file, &default_config) {
-                    error!("Failed to write to config file: {}, aborting", e);
-                    std::process::exit(1);
-                }
-            },
-            Err(e) => {
-                error!("Failed to create config file: {}, aborting", e);
-                std::process::exit(1);
-            }
-        }
+        let file = fs::File::create(format!("{}/window_config.json", lymap_conf))?;
+        serde_json::to_writer_pretty(file, &default_config)?;
     }
 
     // Create key layout folder.
-    create_if_not_exists(
-        format!("{}/layouts", lymap_conf).as_str()
-    );
+    create_if_not_exists(&format!("{}/layouts", lymap_conf));
+
+    Ok(())
 }
