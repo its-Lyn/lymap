@@ -1,0 +1,47 @@
+{
+    "idle_colour": "#6e6e6e",
+    "active_colour": "#ffffff",
+
+    "buttons": [
+        {
+            "x": 5,
+            "y": 5,
+
+            "text": "A",
+            "key": "A",
+
+            "width": 45,
+            "height": 45
+        },
+        {
+            "x": 55,
+            "y": 5,
+
+            "text": "S",
+            "key": "S",
+
+            "width": 45,
+            "height": 45
+        },
+        {
+            "x": 145,
+            "y": 5,
+
+            "text": "K",
+            "key": "K",
+
+            "width": 45,
+            "height": 45
+        },
+        {
+            "x": 195,
+            "y": 5,
+
+            "text": "L",
+            "key": "L",
+
+            "width": 45,
+            "height": 45
+        }
+    ]
+}

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Lymap
+Icon=/usr/share/lymap/assets/icons/lymap-128x128.png
+Exec=lymap
+Categories=Games;Graphics
+Comment=Simple keyboard visualiser
+Terminal=false

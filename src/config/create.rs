@@ -1,3 +1,4 @@
+use crate::utils::config_path::get_assets_path;
 use crate::utils::env_variables::xdg_config_set;
 
 use std::{path::Path, error::Error};
@@ -37,9 +38,7 @@ pub fn create_config() -> Result<(), Box<dyn Error>> {
     // Create window_config.json
     if !Path::new(&format!("{}/window_config.json", lymap_conf)).exists() {
         // Fetch the default font path (lymap/assets)
-        let binary_path = std::env::current_exe()?;
-        let binary_dir  = binary_path.parent().expect("Failed to get parent of binary.");
-        let font_loc    = format!("{}/assets/Ubuntu-Regular.ttf", binary_dir.display());
+        let font_loc    = format!("{}/Ubuntu-Regular.ttf", get_assets_path()?);
 
         let default_config = WindowConfig {
             bg_colour: "#0c42a6".to_string(),

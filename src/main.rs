@@ -11,6 +11,8 @@ use native_dialog::FileDialog;
 use ui::buttons;
 use utils::{colour::hex_to_rgb, config_path::get_config_path};
 
+use crate::utils::config_path::get_assets_path;
+
 mod utils;
 mod config;
 mod ui;
@@ -93,9 +95,7 @@ async fn main() {
         Err(e) => {
             error!("Failed to load font: {}. Trying to fall back to default.", e);
 
-            let current_binary = if_err!(std::env::current_exe(), "Failed to fetch binary path.");
-            let bin_directory = if_err!(current_binary.parent().ok_or("Invalid/missing parent directory for binary."), "Failed to fetch binary path");
-            if_err!(load_ttf_font(&format!("{}/assets/Ubuntu-Regular.ttf", bin_directory.display())).await, "Failed to load default font.")
+            if_err!(load_ttf_font(&format!("{}/Ubuntu-Regular.ttf", if_err!(get_assets_path(), "Failed to get asset path"))).await, "Failed to load default font.")
         }
     };
 
