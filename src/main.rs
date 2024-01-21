@@ -8,13 +8,13 @@ use log::{error, warn, LevelFilter, info};
 use macroquad::{miniquad, window::{next_frame, clear_background, request_new_screen_size}, text::{load_ttf_font, Font}, input::is_key_down};
 
 use native_dialog::FileDialog;
-use serde::de::Expected;
 use ui::buttons;
 use utils::{colour::hex_to_rgb, config_path::get_config_path};
 
 mod utils;
 mod config;
 mod ui;
+mod cache;
 
 // Macro for easily handling errors in one line..
 macro_rules! if_err {
@@ -42,7 +42,7 @@ async fn main() {
 
     builder.init();
 
-    let lymap_version = "0.1.5-beta";
+    let lymap_version = "0.1.9-beta";
     let current_os = std::env::consts::OS;
     let current_arch = std::env::consts::ARCH;
 
@@ -76,6 +76,7 @@ async fn main() {
 
     let bg_colour = hex_to_rgb(&window_config.bg_colour);
     let mut btn_config: Option<ButtonConfig> = Default::default();
+    if_err!(cache::load::load(&mut btn_config), "Failed to load cache");
 
     let mut config_load = false;
     let mut config_reset = false;
@@ -93,9 +94,8 @@ async fn main() {
             error!("Failed to load font: {}. Trying to fall back to default.", e);
 
             let current_binary = if_err!(std::env::current_exe(), "Failed to fetch binary path.");
-            let binary_directory = current_binary.parent().expect("Failed to fetch binary directory");
-
-            if_err!(load_ttf_font(&format!("{}/assets/Ubuntu-Regular.ttf", binary_directory.display())).await, "Failed to load default font.")
+            let bin_directory = if_err!(current_binary.parent().ok_or("Invalid/missing parent directory for binary."), "Failed to fetch binary path");
+            if_err!(load_ttf_font(&format!("{}/assets/Ubuntu-Regular.ttf", bin_directory.display())).await, "Failed to load default font.")
         }
     };
 
@@ -124,6 +124,10 @@ async fn main() {
                         Ok(config) => { 
                             if config.is_some() {
                                 info!("Loaded layout {}", &path.display());
+
+                                // Transform Path to String and then write to cache
+                                let str_path = if_err!(&path.to_str().ok_or("Invalid path provided"), "Failed convert path to string").to_string();
+                                if_err!(cache::write::write(&str_path), "Failed to write cache");
                             }
 
                             btn_config = config; 

@@ -35,7 +35,7 @@ pub fn create_config() -> Result<(), Box<dyn Error>> {
     create_if_not_exists(lymap_conf.as_str());
 
     // Create window_config.json
-    if !Path::new(format!("{}/window_config.json", lymap_conf).as_str()).exists() {
+    if !Path::new(&format!("{}/window_config.json", lymap_conf)).exists() {
         // Fetch the default font path (lymap/assets)
         let binary_path = std::env::current_exe()?;
         let binary_dir  = binary_path.parent().expect("Failed to get parent of binary.");
@@ -60,6 +60,14 @@ pub fn create_config() -> Result<(), Box<dyn Error>> {
 
     // Create key layout folder.
     create_if_not_exists(&format!("{}/layouts", lymap_conf));
+
+    // Crate cache
+    create_if_not_exists(&format!("{}/cache", lymap_conf));
+   
+   if !Path::new(&format!("{}/cache/cache.json", lymap_conf)).exists() {
+        info!("{}/cache/cache.json does not exist, creating.", lymap_conf);
+        fs::File::create(format!("{}/cache/cache.json", lymap_conf))?;
+   } 
 
     Ok(())
 }
