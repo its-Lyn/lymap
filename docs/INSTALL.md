@@ -5,7 +5,7 @@ One day.. Just not today
 
 ## Using the release page
 Press the releases button on the github repository, and download the latest release.
-Untar it, and you're done, you can now run lymap! <br>
+Untar it, and you're done, you can now run lymap! Warning that if you do not use the makefile you'll need to make your own desktop file. <br>
 
 But you can also use the Makefile, Which is located in the directory you just downloaded. <br>
 Make sure to install [make](https://www.gnu.org/software/make/manual/make.html) on your system and simply do:
