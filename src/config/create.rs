@@ -1,4 +1,3 @@
-use crate::utils::config_path::get_assets_path;
 use crate::utils::env_variables::xdg_config_set;
 
 use std::{path::Path, error::Error};
@@ -37,13 +36,10 @@ pub fn create_config() -> Result<(), Box<dyn Error>> {
 
     // Create window_config.json
     if !Path::new(&format!("{}/window_config.json", lymap_conf)).exists() {
-        // Fetch the default font path (lymap/assets)
-        let font_loc    = format!("{}/Ubuntu-Regular.ttf", get_assets_path()?);
-
         let default_config = WindowConfig {
             bg_colour: "#0c42a6".to_string(),
 
-            font_path: font_loc,
+            font_path: None,
             font_size: 14,
             font_colour: "#000000".to_string(),
             

@@ -86,16 +86,27 @@ async fn main() {
     let device_state = DeviceState::new(); 
     
     // Load font
-    let font: Font = match load_ttf_font(&window_config.font_path).await {
-        Ok(font_ok) => {
-            info!("Loaded font {}", &window_config.font_path);
-            font_ok
+    let font: Font;
+    match &window_config.font_path {
+        Some(font_path) => {
+            font = match load_ttf_font(font_path).await {
+                Ok(font_ok) => {
+                    info!("Loaded font {}", font_path);
+                    font_ok
+                },
+        
+                Err(e) => {
+                    error!("Failed to load font: {}. Trying to fall back to default.", e);
+        
+                    if_err!(load_ttf_font(&format!("{}/Ubuntu-Regular.ttf", if_err!(get_assets_path(), "Failed to get asset path"))).await, "Failed to load default font.")
+                }
+            };
         },
 
-        Err(e) => {
-            error!("Failed to load font: {}. Trying to fall back to default.", e);
-
-            if_err!(load_ttf_font(&format!("{}/Ubuntu-Regular.ttf", if_err!(get_assets_path(), "Failed to get asset path"))).await, "Failed to load default font.")
+        None => {
+            info!("No font specified, using default font.");
+            
+            font = if_err!(load_ttf_font(&format!("{}/Ubuntu-Regular.ttf", if_err!(get_assets_path(), "Failed to get asset path"))).await, "Failed to load default font.");
         }
     };
 
@@ -151,6 +162,7 @@ async fn main() {
                 if btn_config.is_some() {
                     info!("Resetting button layout.");
                     btn_config = None; 
+                    if_err!(cache::write::write(&""), "Failed to write cache");
                 }
 
                 config_reset = true;

@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 pub struct WindowConfig {
     pub bg_colour: String,
 
-    pub font_path: String,
+    pub font_path: Option<String>,
     pub font_size: u16,
     pub font_colour: String,
 
