@@ -16,8 +16,10 @@ build:
 uninstall:
 	rm /usr/local/bin/lymap
 	rm -rf /usr/share/lymap
+	rm /usr/share/applications/lymap.desktop
 
-	cargo clean
+	@echo "Do not forget to uninstall the config file."
+	@echo "It is either located in $XDG_CONFIG_HOME/lymap or in ~/.config/lymap"
 
 binary_install:
 	install -Dm 755 $(CURDIR)/lymap /usr/local/bin/lymap	
