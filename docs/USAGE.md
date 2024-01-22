@@ -4,8 +4,12 @@ When you first open the program, lymap will create a bunch of files in your conf
 
 Lymap will look for the XDG_CONFIG_HOME environment variable. If this variable is not set, it will default to the .config directory located inside your user's home directory.
 
+Lymap is configured using JSON files (.json)
+
 ## Window Config
 This is the config for your window resides. <br>
+It is located inside lymap/window_config.json
+
 | Name        | Type       | Description                                                        | Default Value |
 |-------------|------------|--------------------------------------------------------------------|---------------|
 | bg_colour   | Hex String | This is the background of the window.                              | #0c42a6       |
@@ -41,6 +45,8 @@ Below the buttons are defined.
 | height | Int    | The height of the button.                       |
 
 To learn more about the `key` value, take a look inside the [global keybind documentation](./GLOBAL_KEYBINDS.md).
+
+Layouts should be placed in lymap/layouts/your_layout.json, for example.
 
 ## Cache
 A `cache` directory is crated by lymap. This directory is used by lymap to save old values. <br>
