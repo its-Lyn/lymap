@@ -1,0 +1,78 @@
+{
+    "idle_colour": "#000000",
+    "active_colour": "#ffffff",
+
+    "buttons": [
+        {
+            "x": 100,
+            "y": 10,
+
+            "text": "up",
+            "key": "Up",
+
+            "width": 45,
+            "height": 45
+        },
+        {
+            "x": 45,
+            "y": 65,
+
+            "text": "left",
+            "key": "Left",
+
+            "width": 45,
+            "height": 45
+        },
+        {
+            "x": 100,
+            "y": 65,
+
+            "text": "down",
+            "key": "Down",
+
+            "width": 45,
+            "height": 45
+        },
+        {
+            "x": 155,
+            "y": 65,
+
+            "text": "right",
+            "key": "Right",
+
+            "width": 45,
+            "height": 45
+        },
+
+        {
+            "x": 235,
+            "y": 35,
+
+            "text": "jump",
+            "key": "Z",
+
+            "width": 45,
+            "height": 45
+        },
+        {
+            "x": 285,
+            "y": 35,
+
+            "text": "dash",
+            "key": "X",
+
+            "width": 45,
+            "height": 45
+        },
+        {
+            "x": 335,
+            "y": 35,
+
+            "text": "climb",
+            "key": "C",
+
+            "width": 45,
+            "height": 45
+        }
+    ]
+}
