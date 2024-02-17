@@ -115,7 +115,7 @@ async fn main() {
         let keys: Vec<Keycode> = device_state.get_keys();
 
         if is_key_down(miniquad::KeyCode::LeftControl) && is_key_down(miniquad::KeyCode::L) {
-           if !config_load {
+            if !config_load {
                 info!("Trying to load config folder...");
         
                 let dialog = FileDialog::new()
@@ -152,7 +152,7 @@ async fn main() {
                 }
 
                 config_load = true;
-           } 
+            }   
         } else {
             config_load = false;
         }
@@ -176,7 +176,15 @@ async fn main() {
         
         if let Some(config) = &btn_config { 
             for button in config.buttons.iter() { 
-                buttons::draw_fmt(button, &font, &keys, &config.idle_colour, &config.active_colour, window_config.font_size, &window_config.font_colour);
+                buttons::draw_fmt(
+                    button, 
+                    &font, 
+                    &keys, 
+                    &config.idle_colour, 
+                    &config.active_colour, 
+                    window_config.font_size, 
+                    &window_config.font_colour
+                );
             }
         }
 

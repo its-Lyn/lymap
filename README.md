@@ -10,3 +10,6 @@ To learn about installing lymap, have a look at the [install docs](./docs/INSTAL
 
 ## Usage
 Take a peek at the [usage guide](./docs/USAGE.md).
+
+## Showcase
+https://github.com/its-Lyn/lymap/blob/main/assets/github/lymap.mp4
